@@ -1,102 +1,122 @@
 package ru.netology.test;
 
-import lombok.val;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.data.DataHelper;
-import ru.netology.page.CardPage;
 import ru.netology.page.DashboardPage;
 import ru.netology.page.LoginPageV1;
 
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MoneyTransferTest {
 
+    int amount = 100;
+    int amountOverBalance = 30_000;
+    int negativeAmount = -300;
+    int positiveAmount = 300;
 
     @BeforeEach
-    void setup() {
+    public void setUp() {
         open("http://localhost:9999");
-        val loginPage = new LoginPageV1();
-        val authInfo = DataHelper.getAuthInfo();
-        val verificationPage = loginPage.validLogin(authInfo);
-        val verificationCode = DataHelper.getVerificationCodeFor(authInfo);
+        var loginPage = new LoginPageV1();
+        var authInfo = DataHelper.getAuthInfo();
+        var verificationPage = loginPage.validLogin(authInfo);
+        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         verificationPage.validVerify(verificationCode);
+        var dashboardPage = new DashboardPage();
 
-    }
+        var balance1 = dashboardPage.getCardBalance(0);
+        var balance2 = dashboardPage.getCardBalance(1);
 
-    @AfterEach
-    void asserting() {
-        val dashboardPage = new DashboardPage();
-        val balance1 = dashboardPage.getFirstCardBalance();
-        val balance2 = dashboardPage.getSecondCardBalance();
-        if (balance1 - balance2 > 0) {
-            val amountToTransf = (balance1 - balance2) / 2;
-            val cardInfo = DataHelper.getFirstCardInfo();
-            val cardReplenishmentPage = dashboardPage.chooseSecondCardToRecharge();
-            cardReplenishmentPage.transferMany(cardInfo, amountToTransf);
-
-
+        if (balance1 > balance2) {
+            int transferSum = (balance1 - balance2) / 2;
+            var cardInfo = DataHelper.getFirstCardInfo();
+            var cardRefillPage = dashboardPage.selectSecondCard();
+            cardRefillPage.moneyTransfer(cardInfo, transferSum);
         }
-        if (balance2 - balance1 > 0) {
-            val amountToTransf = (balance2 - balance1) / 2;
-            val cardInfo = DataHelper.getSecondCardInfo();
-            val cardReplenishmentPage = dashboardPage.chooseFirstCardToRecharge();
-            cardReplenishmentPage.transferMany(cardInfo, amountToTransf);
-
+        if (balance1 < balance2) {
+            int transferSum = (balance2 - balance1) / 2;
+            var cardInfo = DataHelper.getSecondCardInfo();
+            var cardRefillPage = dashboardPage.selectFirstCard();
+            cardRefillPage.moneyTransfer(cardInfo, transferSum);
         }
-
-    }
-
-
-    int amountToTransfer = 500;
-    int newAmountToTransfer = 10500;
-
-    @Test
-    void shouldTransferFromFirstToSecondCard() {
-        val dashboardPage = new DashboardPage();
-        val balanceFirstCardBefore = dashboardPage.getFirstCardBalance();
-        val balanceSecondCardBefore = dashboardPage.getSecondCardBalance();
-        val cardReplenishmentPage = dashboardPage.chooseSecondCardToRecharge();
-        val cardInfo = DataHelper.getFirstCardInfo();
-        cardReplenishmentPage.transferMany(cardInfo, 500);
-        val balanceAfterTransactionOnRecharged = DataHelper.checkBalanceOfRechargeableCard(balanceSecondCardBefore, amountToTransfer);
-        val balanceAfterTransaction = DataHelper.checkBalanceWhereTransfer(balanceFirstCardBefore, amountToTransfer);
-        val balanceFirstCardAfter = dashboardPage.getFirstCardBalance();
-        val balanceSecondCardAfter = dashboardPage.getSecondCardBalance();
-        assertEquals(balanceAfterTransactionOnRecharged, balanceSecondCardAfter);
-        assertEquals(balanceAfterTransaction, balanceFirstCardAfter);
     }
 
     @Test
-    void shouldTransferFromSecondToFirstCard() {
-        val dashboardPage = new DashboardPage();
-        val balanceFirstCardBefore = dashboardPage.getFirstCardBalance();
-        val balanceSecondCardBefore = dashboardPage.getSecondCardBalance();
-        val cardReplenishmentPage = dashboardPage.chooseFirstCardToRecharge();
-        val cardInfo = DataHelper.getSecondCardInfo();
-        cardReplenishmentPage.transferMany(cardInfo, 500);
-        val balanceAfterTransactionOnRecharged = DataHelper.checkBalanceOfRechargeableCard(balanceFirstCardBefore, amountToTransfer);
-        val balanceAfterTransaction = DataHelper.checkBalanceWhereTransfer(balanceSecondCardBefore, amountToTransfer);
-        val balanceFirstCardAfter = dashboardPage.getFirstCardBalance();
-        val balanceSecondCardAfter = dashboardPage.getSecondCardBalance();
-        assertEquals(balanceAfterTransactionOnRecharged, balanceFirstCardAfter);
-        assertEquals(balanceAfterTransaction, balanceSecondCardAfter);
+    void shouldTransferMoneyFrom1To2Card() {
+        var dashboardPage = new DashboardPage();
+        var balanceFirstBefore = dashboardPage.getCardBalance(0);
+        var balanceSecondBefore = dashboardPage.getCardBalance(1);
+
+        var cardRefillPage = dashboardPage.selectSecondCard();
+        var cardInfo = DataHelper.getFirstCardInfo();
+        cardRefillPage.moneyTransfer(cardInfo, amount);
+
+        int balanceAfterOnCardFrom = DataHelper.balanceOnCardFrom(balanceSecondBefore, amount);
+        int balanceAfterOnCardTo = DataHelper.balanceOnCardTo(balanceFirstBefore, amount);
+        int balanceFirstAfter = dashboardPage.getCardBalance(0);
+        int balanceSecondAfter = dashboardPage.getCardBalance(1);
+
+        assertEquals(balanceFirstAfter, balanceAfterOnCardFrom);
+        assertEquals(balanceSecondAfter, balanceAfterOnCardTo);
     }
 
     @Test
-    void shouldTransferFromSecondToFirstCardIfTransferIsGreaterThanBalance() {
-        val dashboardPage = new DashboardPage();
-        val balanceFirstCardBefore = dashboardPage.getFirstCardBalance();
-        val balanceSecondCardBefore = dashboardPage.getSecondCardBalance();
-        val cardReplenishmentPage = dashboardPage.chooseFirstCardToRecharge();
-        val cardInfo = DataHelper.getSecondCardInfo();
-        cardReplenishmentPage.transferMany(cardInfo, newAmountToTransfer);
-        val dashboardPageWithError = new DashboardPage();
-        dashboardPageWithError.getNotificationVisible();
+    void shouldTransferMoneyFrom2To1Card() {
+        var dashboardPage = new DashboardPage();
+        var balanceFirstBefore = dashboardPage.getCardBalance(0);
+        var balanceSecondBefore = dashboardPage.getCardBalance(1);
 
+        var cardRefillPage = dashboardPage.selectFirstCard();
+        var cardInfo = DataHelper.getSecondCardInfo();
+        cardRefillPage.moneyTransfer(cardInfo, amount);
+
+        int balanceAfterOnCardFrom = DataHelper.balanceOnCardFrom(balanceFirstBefore, amount);
+        int balanceAfterOnCardTo = DataHelper.balanceOnCardTo(balanceSecondBefore, amount);
+        int balanceFirstAfter = dashboardPage.getCardBalance(0);
+        int balanceSecondAfter = dashboardPage.getCardBalance(1);
+
+        assertEquals(balanceFirstAfter, balanceAfterOnCardTo);
+        assertEquals(balanceSecondAfter, balanceAfterOnCardFrom);
     }
 
+//    @Test
+//    void shouldNotTransferAmountOverBalanceFrom2To1Card() {
+//        var dashboardPage = new DashboardPage();
+//        var cardRefillPage = dashboardPage.selectFirstCard();
+//        var cardInfo = DataHelper.getSecondCardInfo();
+//        cardRefillPage.moneyTransfer(cardInfo, amountOverBalance);
+//        var error = new DashboardPage();
+//        error.notificationShouldBeVisible();
+//    }
 
+//    @Test
+//    void shouldNotTransferAmountOverBalanceFrom1To2Card() {
+//        var dashboardPage = new DashboardPage();
+//        var cardRefillPage = dashboardPage.selectSecondCard();
+//        var cardInfo = DataHelper.getFirstCardInfo();
+//        cardRefillPage.moneyTransfer(cardInfo, amountOverBalance);
+//        var error = new DashboardPage();
+//        error.notificationShouldBeVisible();
+//    }
+
+    @Test
+    void shouldConvertNegativeAmountIntoPositive() {
+        var dashboardPage = new DashboardPage();
+        var balanceFirstBefore = dashboardPage.getCardBalance(0);
+        var balanceSecondBefore = dashboardPage.getCardBalance(1);
+
+        var cardRefillPage = dashboardPage.selectSecondCard();
+        var cardInfo = DataHelper.getFirstCardInfo();
+        cardRefillPage.moneyTransfer(cardInfo, negativeAmount);
+
+        int balanceAfterOnCardFrom = DataHelper.balanceOnCardFrom(balanceSecondBefore, positiveAmount);
+        int balanceAfterOnCardTo = DataHelper.balanceOnCardTo(balanceFirstBefore, positiveAmount);
+        int balanceFirstAfter = dashboardPage.getCardBalance(0);
+        int balanceSecondAfter = dashboardPage.getCardBalance(1);
+
+        assertEquals(balanceFirstAfter, balanceAfterOnCardFrom);
+        assertEquals(balanceSecondAfter, balanceAfterOnCardTo);
+    }
 }

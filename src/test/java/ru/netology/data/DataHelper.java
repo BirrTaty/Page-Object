@@ -2,7 +2,6 @@ package ru.netology.data;
 
 import lombok.Value;
 
-
 public class DataHelper {
     private DataHelper() {
     }
@@ -31,25 +30,23 @@ public class DataHelper {
     @Value
     public static class CardInfo {
         private String cardNumber;
-
     }
 
     public static CardInfo getFirstCardInfo() {
-        return new CardInfo("5559000000000001");
+        return new CardInfo("5559 0000 0000 0001");
     }
 
     public static CardInfo getSecondCardInfo() {
-        return new CardInfo("5559000000000002");
+        return new CardInfo("5559 0000 0000 0002");
     }
 
-    public static int checkBalanceWhereTransfer(int balance, int amountForTransfer) {
-        int finalBalance = balance - amountForTransfer;
-        return finalBalance;
+    public static int balanceOnCardFrom(int balance, int transferSum) {
+        int newBalance = balance - transferSum;
+        return newBalance;
     }
 
-    public static int checkBalanceOfRechargeableCard(int balance, int amountForTransfer) {
-        int finalBalance = balance + amountForTransfer;
-        return finalBalance;
+    public static int balanceOnCardTo(int balance, int transferSum) {
+        int newBalance = balance + transferSum;
+        return newBalance;
     }
-
 }
