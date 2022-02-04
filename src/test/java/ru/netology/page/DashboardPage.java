@@ -47,7 +47,7 @@ public class DashboardPage {
         return new CardPage();
     }
 
-    public SelenideElement notificationShouldBeVisible() {
-        return notification.shouldBe(visible);
+
+    public void notificationShouldBeVisible() {
     }
 }

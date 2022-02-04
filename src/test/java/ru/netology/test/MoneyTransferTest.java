@@ -81,25 +81,25 @@ public class MoneyTransferTest {
         assertEquals(balanceSecondAfter, balanceAfterOnCardFrom);
     }
 
-//    @Test
-//    void shouldNotTransferAmountOverBalanceFrom2To1Card() {
-//        var dashboardPage = new DashboardPage();
-//        var cardRefillPage = dashboardPage.selectFirstCard();
-//        var cardInfo = DataHelper.getSecondCardInfo();
-//        cardRefillPage.moneyTransfer(cardInfo, amountOverBalance);
-//        var error = new DashboardPage();
-//        error.notificationShouldBeVisible();
-//    }
+    @Test
+    void shouldNotTransferAmountOverBalanceFrom2To1Card() {
+        var dashboardPage = new DashboardPage();
+        var cardRefillPage = dashboardPage.selectFirstCard();
+        var cardInfo = DataHelper.getSecondCardInfo();
+        cardRefillPage.moneyTransfer(cardInfo, amountOverBalance);
+        var error = new DashboardPage();
+        error.notificationShouldBeVisible();
+    }
 
-//    @Test
-//    void shouldNotTransferAmountOverBalanceFrom1To2Card() {
-//        var dashboardPage = new DashboardPage();
-//        var cardRefillPage = dashboardPage.selectSecondCard();
-//        var cardInfo = DataHelper.getFirstCardInfo();
-//        cardRefillPage.moneyTransfer(cardInfo, amountOverBalance);
-//        var error = new DashboardPage();
-//        error.notificationShouldBeVisible();
-//    }
+    @Test
+    void shouldNotTransferAmountOverBalanceFrom1To2Card() {
+        var dashboardPage = new DashboardPage();
+        var cardRefillPage = dashboardPage.selectSecondCard();
+        var cardInfo = DataHelper.getFirstCardInfo();
+        cardRefillPage.moneyTransfer(cardInfo, amountOverBalance);
+        var error = new DashboardPage();
+        error.notificationShouldBeVisible();
+    }
 
     @Test
     void shouldConvertNegativeAmountIntoPositive() {

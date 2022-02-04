@@ -17,6 +17,8 @@ public class CardPage {
         form.shouldBe(visible);
     }
 
+    public void notificationShouldBeVisible() {}
+
     public void moneyTransfer(DataHelper.CardInfo fromCard, int transferSum) {
         String amount = Integer.toString(transferSum);
         amountField.sendKeys(Keys.chord(Keys.CONTROL,"a"),Keys.DELETE);
