@@ -48,6 +48,5 @@ public class DashboardPage {
     }
 
 
-    public void notificationShouldBeVisible() {
-    }
+
 }

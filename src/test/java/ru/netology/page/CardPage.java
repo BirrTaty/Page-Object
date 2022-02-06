@@ -5,6 +5,7 @@ import org.openqa.selenium.Keys;
 import ru.netology.data.DataHelper;
 
 import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.*;
 
 public class CardPage {
@@ -13,11 +14,16 @@ public class CardPage {
     private static SelenideElement fromField = $("[data-test-id='from'] input");
     private static SelenideElement transferButton = $("[data-test-id='action-transfer']");
 
+    private SelenideElement notification = $("[data-test-id=error-notification]").$(withText("Ошибка"));
+
     public CardPage() {
         form.shouldBe(visible);
     }
 
-    public void notificationShouldBeVisible() {}
+    public SelenideElement notificationShouldBeVisible()
+ {
+        return notification.shouldBe(visible);
+    }
 
     public void moneyTransfer(DataHelper.CardInfo fromCard, int transferSum) {
         String amount = Integer.toString(transferSum);

@@ -87,8 +87,9 @@ public class MoneyTransferTest {
         var cardRefillPage = dashboardPage.selectFirstCard();
         var cardInfo = DataHelper.getSecondCardInfo();
         cardRefillPage.moneyTransfer(cardInfo, amountOverBalance);
-        var error = new DashboardPage();
-        error.notificationShouldBeVisible();
+        cardRefillPage.notificationShouldBeVisible();
+
+
     }
 
     @Test
@@ -97,8 +98,7 @@ public class MoneyTransferTest {
         var cardRefillPage = dashboardPage.selectSecondCard();
         var cardInfo = DataHelper.getFirstCardInfo();
         cardRefillPage.moneyTransfer(cardInfo, amountOverBalance);
-        var error = new DashboardPage();
-        error.notificationShouldBeVisible();
+        cardRefillPage.notificationShouldBeVisible();
     }
 
     @Test
